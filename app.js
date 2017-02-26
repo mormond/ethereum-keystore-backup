@@ -70,14 +70,14 @@ function backupArchive(archiveBackupPath, archiveFile) {
     
     blobService.createBlockBlobFromLocalFile('keystorebackup', archiveFile, archiveBackupPath, function(error, result, response) {
         if (!error) {
-            console.log("Succesfully backed up archive to Azure Blob Storage");
+            console.log("Successfully backed up archive to Azure Blob Storage");
         }
     });
 }
 
 // Ensure required variables are set
 if((process.env.AZURE_STORAGE_KEY && process.env.AZURE_STORAGE_ACCOUNT) || process.env.AZURE_STORAGE_CONNECTION_STRING) {
-    console.log("Azure Blob Storage configured");
+    // Pass
 } else {
     console.log("ERROR: Please set the following environment variables: AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_ACCESS_KEY, or AZURE_STORAGE_CONNECTION_STRING.");
     process.exit(1);
@@ -95,7 +95,7 @@ blobService.createContainerIfNotExists('keystorebackup', {
 }, function(error, result, response) {
   if (!error) {
       if(result) {
-          console.log("Azure container created succesfully");
+          console.log("Azure container created successfully");
       } else {
           console.log("Azure container already exists");
       }
