@@ -5,27 +5,28 @@ var path = require("path");
 var fs = require("fs");
 var azure = require('azure-storage');
 
-var environment = process.env.BACKUP_ENVIROMENT || 'development';
-var homePath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-var keystorePath = process.env.KEYSTORE_PATH || path.join(homePath, '.geth', 'keystore');
-var backupIntervalInSec = process.env.BACKUP_INTERVAL_SEC || 10;
-var backupIntervalInMilliseconds = backupIntervalInSec * 1000;
-var archivesPath = process.env.ARCHIVE_PATH || 'archives';
+var _environment = process.env.BACKUP_ENVIRONMENT || 'development';
+var _homePath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+var _keystorePath = process.env.KEYSTORE_PATH || path.join(_homePath, '.geth', 'keystore');
+var _backupIntervalInSec = process.env.BACKUP_INTERVAL_SEC || 10;
+var _backupIntervalInMilliseconds = _backupIntervalInSec * 1000;
+var _archivesPath = process.env.ARCHIVE_PATH || 'archives';
+var _hostname = os.hostname();
 
-if(environment == 'development') {
+if(_environment == 'development') {
     console.log("Development Environment");
     console.log("----------------------");
-    console.log("Keystore path: " + keystorePath);
-    console.log("Interval (secs): " + backupIntervalInSec);
-    console.log("Archive path: " + archivesPath);
+    console.log("Keystore path: " + _keystorePath);
+    console.log("Interval (secs): " + _backupIntervalInSec);
+    console.log("Archive path: " + _archivesPath);
     console.log("----------------------");
 }
 
-
 // Zip up a source directory and store in a specific directory
-function zipDirectory(dirToZip, zipFileName) {
-    var outputDestination = path.join(archivesPath, zipFileName);
-    console.log("Creating new archive of " + dirToZip + " at location " + outputDestination);
+function zipDirectory(directoryToZip, zipFileName) {
+    var outputDestination = path.join(_archivesPath, zipFileName);
+    console.log("Creating new archive of " + directoryToZip + " at location " + outputDestination);
+
     var output = file_system.createWriteStream(outputDestination);
     var archive = archiver('zip', {
         store: true
@@ -41,7 +42,7 @@ function zipDirectory(dirToZip, zipFileName) {
     });
 
     archive.pipe(output);
-    archive.directory(dirToZip);
+    archive.directory(directoryToZip);
     archive.finalize();
     return outputDestination;
 }
@@ -60,8 +61,7 @@ function generateZipFileName() {
     month = (month < 10 ? "0" : "") + month;
     var day  = date.getDate();
     day = (day < 10 ? "0" : "") + day;
-    var hostname = os.hostname();
-    return hostname + "_" + year + "_" + month + "_" + day + "_" + hour + "_" + min + "_" + sec + ".zip";
+    return _hostname + "_" + year + month + day + hour + min + sec + ".zip";
 }
 
 // Send archive file to a remote storage location for safe keeping
@@ -71,6 +71,9 @@ function backupArchive(archiveBackupPath, archiveFile) {
     blobService.createBlockBlobFromLocalFile('keystorebackup', archiveFile, archiveBackupPath, function(error, result, response) {
         if (!error) {
             console.log("Successfully backed up archive to Azure Blob Storage");
+            console.log(result)
+        } else {
+            throw(error)
         }
     });
 }
@@ -79,13 +82,12 @@ function backupArchive(archiveBackupPath, archiveFile) {
 if((process.env.AZURE_STORAGE_KEY && process.env.AZURE_STORAGE_ACCOUNT) || process.env.AZURE_STORAGE_CONNECTION_STRING) {
     // Pass
 } else {
-    console.log("ERROR: Please set the following environment variables: AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_ACCESS_KEY, or AZURE_STORAGE_CONNECTION_STRING.");
-    process.exit(1);
+    throw("Please set the following environment variables: AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_ACCESS_KEY, or AZURE_STORAGE_CONNECTION_STRING.");
 }
 
 // Ensure local archive directory exists
-if (!fs.existsSync(archivesPath)) {
-    fs.mkdirSync(archivesPath);
+if (!fs.existsSync(_archivesPath)) {
+    fs.mkdirSync(_archivesPath);
 }
 
 // Ensure remote archive container exists
@@ -99,12 +101,14 @@ blobService.createContainerIfNotExists('keystorebackup', {
       } else {
           console.log("Azure container already exists");
       }
+  } else {
+      throw(error);
   }
 });
 
 // Periodically backup local keystore
 setInterval(function() {
-    var zipFile = generateZipFileName();
-    var zipPath = zipDirectory(keystorePath, zipFile);
-    backupArchive(zipPath, zipFile);
-}, backupIntervalInMilliseconds)
+    var uniqueZipFileName = generateZipFileName();
+    var zipPath = zipDirectory(_keystorePath, uniqueZipFileName);
+    backupArchive(zipPath, uniqueZipFileName);
+}, _backupIntervalInMilliseconds)
