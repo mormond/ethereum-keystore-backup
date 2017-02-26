@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/mormond/EthKeyBackup#readme",
   "dependencies": {
-    "archiver" : "*"
+    "archiver" : "*",
+    "azure-storage": "*"
   }
 }

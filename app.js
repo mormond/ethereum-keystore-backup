@@ -3,17 +3,13 @@ var archiver = require('archiver');
 var os = require("os");
 var path = require("path");
 var fs = require("fs");
+var azure = require('azure-storage');
 
 var homePath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 var keystorePath = process.env.KEYSTORE_PATH || path.join(homePath, '.geth', 'keystore');
 var backupIntervalInSec = process.env.BACKUP_INTERVAL_SEC || 10;
 var backupIntervalInMilliseconds = backupIntervalInSec * 1000;
 var archivesPath = process.env.ARCHIVE_PATH || 'archives';
-
-// Ensure archive directory exists
-if (!fs.existsSync(archivesPath)) {
-    fs.mkdirSync(archivesPath);
-}
 
 // Zip up a source directory and store in a specific directory
 function zipDirectory(dirToZip, zipFileName) {
@@ -58,12 +54,46 @@ function generateZipFileName() {
 }
 
 // Send archive file to a remote storage location for safe keeping
-function backupArchive(archiveToBackupPath) {
-    console.log("Sending " + archiveToBackupPath + " to remote backup store");
+function backupArchive(archiveBackupPath, archiveFile) {
+    console.log("Uploading " + archiveBackupPath + " to azure blob " + archiveFile);
+    
+    blobService.createBlockBlobFromLocalFile('keystorebackup', archiveFile, archiveBackupPath, function(error, result, response) {
+        if (!error) {
+            console.log("Succesfully backed up archive to Azure blob");
+        }
+    });
 }
+
+// Ensure required variables are set
+if((process.env.AZURE_STORAGE_KEY && process.env.AZURE_STORAGE_ACCOUNT) || process.env.AZURE_STORAGE_CONNECTION_STRING) {
+    console.log("Azure Blob configured");
+} else {
+    console.log("ERROR: Please set the following environment variables: AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_ACCESS_KEY, or AZURE_STORAGE_CONNECTION_STRING.");
+    process.exit(1);
+}
+
+// Ensure local archive directory exists
+if (!fs.existsSync(archivesPath)) {
+    fs.mkdirSync(archivesPath);
+}
+
+// Ensure remote archive container exists
+var blobService = azure.createBlobService();
+blobService.createContainerIfNotExists('keystorebackup', {
+  publicAccessLevel: 'blob'
+}, function(error, result, response) {
+  if (!error) {
+      if(result) {
+          console.log("Azure container created succesfully");
+      } else {
+          console.log("Azure container already exists");
+      }
+  }
+});
 
 // Periodically backup local keystore
 setInterval(function() {
-    var zipPath = zipDirectory(keystorePath, generateZipFileName());
-    backupArchive(zipPath);
+    var zipFile = generateZipFileName();
+    var zipPath = zipDirectory(keystorePath, zipFile);
+    backupArchive(zipPath, zipFile);
 }, backupIntervalInMilliseconds)
