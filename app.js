@@ -5,11 +5,22 @@ var path = require("path");
 var fs = require("fs");
 var azure = require('azure-storage');
 
+var environment = process.env.BACKUP_ENVIROMENT || 'development';
 var homePath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
 var keystorePath = process.env.KEYSTORE_PATH || path.join(homePath, '.geth', 'keystore');
 var backupIntervalInSec = process.env.BACKUP_INTERVAL_SEC || 10;
 var backupIntervalInMilliseconds = backupIntervalInSec * 1000;
 var archivesPath = process.env.ARCHIVE_PATH || 'archives';
+
+if(environment == 'development') {
+    console.log("Development Environment");
+    console.log("----------------------");
+    console.log("Keystore path: " + keystorePath);
+    console.log("Interval (secs): " + backupIntervalInSec);
+    console.log("Archive path: " + archivesPath);
+    console.log("----------------------");
+}
+
 
 // Zip up a source directory and store in a specific directory
 function zipDirectory(dirToZip, zipFileName) {
@@ -22,7 +33,7 @@ function zipDirectory(dirToZip, zipFileName) {
 
     output.on('close', function () {
         console.log(archive.pointer() + ' total bytes');
-        console.log('archiver has been finalized and the output file descriptor has closed.');
+        console.log('Archiver has been finalized and the output file descriptor has closed.');
     });
 
     archive.on('error', function(err){
