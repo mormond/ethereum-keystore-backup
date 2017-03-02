@@ -19,6 +19,9 @@ if(_environment == 'development') {
     console.log("Keystore path: " + _keystorePath);
     console.log("Interval (secs): " + _backupIntervalInSec);
     console.log("Archive path: " + _archivesPath);
+    console.log("AZURE_STORAGE_KEY: " + process.env.AZURE_STORAGE_KEY);
+    console.log("AZURE_STORAGE_ACCOUNT: " + process.env.AZURE_STORAGE_ACCOUNT);
+    console.log("AZURE_STORAGE_CONNECTION_STRING: " + process.env.AZURE_STORAGE_CONNECTION_STRING);   
     console.log("----------------------");
 }
 
