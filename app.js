@@ -89,6 +89,11 @@ if((process.env.AZURE_STORAGE_KEY && process.env.AZURE_STORAGE_ACCOUNT) || proce
 }
 
 // Ensure local archive directory exists
+if (!fs.existsSync(_keystorePath)) {
+    throw("There is no keystore to backup!");
+}
+
+// Ensure local archive directory exists
 if (!fs.existsSync(_archivesPath)) {
     fs.mkdirSync(_archivesPath);
 }
