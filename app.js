@@ -19,7 +19,7 @@ if(_environment == 'development') {
     console.log("Keystore path: " + _keystorePath);
     console.log("Interval (secs): " + _backupIntervalInSec);
     console.log("Archive path: " + _archivesPath);
-    console.log("AZURE_STORAGE_KEY: " + process.env.AZURE_STORAGE_KEY);
+    console.log("AZURE_STORAGE_ACCESS_KEY: " + process.env.AZURE_STORAGE_ACCESS_KEY);
     console.log("AZURE_STORAGE_ACCOUNT: " + process.env.AZURE_STORAGE_ACCOUNT);
     console.log("AZURE_STORAGE_CONNECTION_STRING: " + process.env.AZURE_STORAGE_CONNECTION_STRING);   
     console.log("----------------------");
@@ -82,7 +82,7 @@ function backupArchive(archiveBackupPath, archiveFile) {
 }
 
 // Ensure required variables are set
-if((process.env.AZURE_STORAGE_KEY && process.env.AZURE_STORAGE_ACCOUNT) || process.env.AZURE_STORAGE_CONNECTION_STRING) {
+if((process.env.AZURE_STORAGE_ACCESS_KEY && process.env.AZURE_STORAGE_ACCOUNT) || process.env.AZURE_STORAGE_CONNECTION_STRING) {
     // Pass
 } else {
     throw("Please set the following environment variables: AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_ACCESS_KEY, or AZURE_STORAGE_CONNECTION_STRING.");
