@@ -10,7 +10,7 @@ var _homePath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROF
 var _keystorePath = process.env.KEYSTORE_PATH || path.join(_homePath, '.geth', 'keystore');
 var _backupIntervalInSec = process.env.BACKUP_INTERVAL_SEC || 10;
 var _backupIntervalInMilliseconds = _backupIntervalInSec * 1000;
-var _archivesPath = process.env.ARCHIVE_PATH || 'archives';
+var _archivesPath = process.env.ARCHIVE_PATH || '.archives';
 var _hostname = os.hostname();
 
 if(_environment == 'development') {
