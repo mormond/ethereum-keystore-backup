@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mormond/EthKeyBackup.git"
+    "url": "git+https://github.com/mormond/ethereum-keystore-backup.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/mormond/EthKeyBackup/issues"
+    "url": "https://github.com/mormond/ethereum-keystore-backup/issues"
   },
-  "homepage": "https://github.com/mormond/EthKeyBackup#readme",
+  "homepage": "https://github.com/mormond/ethereum-keystore-backup#readme",
   "dependencies": {
     "archiver" : "*",
     "azure-storage": "*"
